@@ -1,0 +1,27 @@
+node_modules/
+.pnpm-store/
+.expo/
+dist/
+.env
+.env.local
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+firebase-service-account*.json
+service-account*.json
+*.orig.*
+web-build/
+.DS_Store
+expo-env.d.ts
+
+# Artefatos locais que não são necessários no build
+android/
+ios/
+work/
+outputs/
+templates/
+docs/
+*.log
+*.txt
+__MACOSX/
