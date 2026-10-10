@@ -7,6 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '1.0.0',
   orientation: 'portrait',
   scheme: 'storyroot',
+  icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
   backgroundColor: '#F2EFE8',
   ios: {
@@ -17,6 +18,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: process.env.ANDROID_PACKAGE ?? 'com.gbizarria.storyroot',
     googleServicesFile: process.env.GOOGLE_SERVICES_FILE || undefined,
     adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#F2EFE8',
     },
     predictiveBackGestureEnabled: true,
@@ -45,6 +47,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
+        image: './assets/splash-icon.png',
+        imageWidth: 160,
         backgroundColor: '#F2EFE8',
         resizeMode: 'contain',
       },
