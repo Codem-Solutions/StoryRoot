@@ -1,0 +1,10 @@
+export type Example = {
+  id: string;
+  title: string;
+};
+
+export interface ExampleGateway {
+  list(): Promise<Example[]>;
+  getById(id: string): Promise<Example>;
+}
+

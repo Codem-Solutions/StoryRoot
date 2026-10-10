@@ -1,0 +1,292 @@
+
+> expo-foundation@1.0.0 lint
+> expo lint
+
+Using legacy ESLint config. Consider upgrading to flat config.
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\AlimentoPickerSheet.tsx
+  88:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\AlimentoPickerSheet.tsx:88:7
+  86 |   React.useEffect(() => {
+  87 |     if (visible) {
+> 88 |       setSelecionados(selecionadosIds);
+     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  89 |       setBusca('');
+  90 |     }
+  91 |   }, [selecionadosIds, visible]);  react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\DatePickerSheet.tsx
+  44:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\DatePickerSheet.tsx:44:7
+  42 |   useEffect(() => {
+  43 |     if (visible) {
+> 44 |       setCursor(startOfMonth(value));
+     |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |       setSelecionado(value);
+  46 |     }
+  47 |     // eslint-disable-next-line react-hooks/exhaustive-deps  react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx
+  113:36  warning  Array type using 'Array<T>' is forbidden. Use 'T[]' instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/array-type
+  157:15  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx:157:15
+  155 |   const pinca = Gesture.Pinch()
+  156 |     .runOnJS(true)
+> 157 |     .onUpdate(evento => {
+      |               ^^^^^^^^^^^
+> 158 |       const bruta = escalaAtual.current * evento.scale;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 159 |       escalaAnim.setValue(Math.min(ZOOM_MAXIMO, Math.max(1, bruta)));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 160 |     })
+      | ^^^^^^ Passing a ref to a function may read its value during render
+  161 |     .onEnd(evento => {
+  162 |       escalaAtual.current = Math.min(ZOOM_MAXIMO, Math.max(1, escalaAtual.current * evento.scale));
+  163 |       setZoomAtivo(escalaAtual.current > 1.02);                                                                                                                                                           react-hooks/refs
+  161:12  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx:161:12
+  159 |       escalaAnim.setValue(Math.min(ZOOM_MAXIMO, Math.max(1, bruta)));
+  160 |     })
+> 161 |     .onEnd(evento => {
+      |            ^^^^^^^^^^^
+> 162 |       escalaAtual.current = Math.min(ZOOM_MAXIMO, Math.max(1, escalaAtual.current * evento.scale));
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 163 |       setZoomAtivo(escalaAtual.current > 1.02);
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 176 |       ]).start();
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 177 |     });
+      | ^^^^^^ Passing a ref to a function may read its value during render
+  178 |
+  179 |   const arrasto = Gesture.Pan()
+  180 |     .runOnJS(true)  react-hooks/refs
+  181:14  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx:181:14
+  179 |   const arrasto = Gesture.Pan()
+  180 |     .runOnJS(true)
+> 181 |     .onBegin(() => {
+      |              ^^^^^^^
+> 182 |       translacaoXInicio.current = translacaoXAtual.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 183 |       translacaoYInicio.current = translacaoYAtual.current;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 184 |     })
+      | ^^^^^^ Passing a ref to a function may read its value during render
+  185 |     .onUpdate(evento => {
+  186 |       if (escalaAtual.current <= 1.01) return;
+  187 |                                                                                                                                                                                                                                                                     react-hooks/refs
+  185:15  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx:185:15
+  183 |       translacaoYInicio.current = translacaoYAtual.current;
+  184 |     })
+> 185 |     .onUpdate(evento => {
+      |               ^^^^^^^^^^^
+> 186 |       if (escalaAtual.current <= 1.01) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 187 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 194 |       translacaoYAnim.setValue(proximoY);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |     })
+      | ^^^^^^ Passing a ref to a function may read its value during render
+  196 |     .onEnd(evento => {
+  197 |       if (escalaAtual.current <= 1.01) return;
+  198 |                                                                                                                                                                                                                                react-hooks/refs
+  196:12  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\GrowthChart.tsx:196:12
+  194 |       translacaoYAnim.setValue(proximoY);
+  195 |     })
+> 196 |     .onEnd(evento => {
+      |            ^^^^^^^^^^^
+> 197 |       if (escalaAtual.current <= 1.01) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 205 |       translacaoYAnim.setValue(translacaoYAtual.current);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 206 |     }) as any;
+      | ^^^^^^ Passing a ref to a function may read its value during render
+  207 |
+  208 |   function restaurarZoom() {
+  209 |     escalaAtual.current = 1;                                                                                                                                                                                                                                            react-hooks/refs
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\PeriodoPersonalizadoSheet.tsx
+  35:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\PeriodoPersonalizadoSheet.tsx:35:7
+  33 |   useEffect(() => {
+  34 |     if (visible) {
+> 35 |       setInicio(valorInicial?.inicio);
+     |       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  36 |       setFim(valorInicial?.fim);
+  37 |     }
+  38 |   }, [visible, valorInicial]);  react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\TimePickerSheet.tsx
+  36:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\components\TimePickerSheet.tsx:36:7
+  34 |   useEffect(() => {
+  35 |     if (visible) {
+> 36 |       setHour(value.getHours());
+     |       ^^^^^^^ Avoid calling setState() directly within an effect
+  37 |       setMinute(value.getMinutes());
+  38 |       setInputHora(String(value.getHours()).padStart(2, '0'));
+  39 |       setInputMinuto(String(value.getMinutes()).padStart(2, '0'));  react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\auth\ResetPasswordScreen.tsx
+  18:11  warning  'FormValues' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\onboarding\CadastroCriancaScreen.tsx
+  39:11  warning  'FormValues' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\perfil\EditarCriancaScreen.tsx
+  28:11  warning  'FormValues' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  96:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\perfil\EditarCriancaScreen.tsx:96:5
+  94 |     setValue('nome', crianca.nome);
+  95 |     setValue('dataNascimento', paraBr(crianca.dataNascimento));
+> 96 |     setFotoUri(crianca.fotoUri);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  97 |     setSexo(crianca.sexo);
+  98 |   }, [crianca, setValue]);
+  99 |  react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\RegistrarBottomSheetScreen.tsx
+  377:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\RegistrarBottomSheetScreen.tsx:377:5
+  375 |
+  376 |   useEffect(() => {
+> 377 |     setInputData(value ? formatarDataBR(value) : '');
+      |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  378 |   }, [value]);
+  379 |
+  380 |   function aplicarDigitacao(texto: string) {  react-hooks/set-state-in-effect
+  535:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\RegistrarBottomSheetScreen.tsx:535:5
+  533 |
+  534 |   useEffect(() => {
+> 535 |     setInputHora(value ? formatarHora(value) : '');
+      |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  536 |   }, [value]);
+  537 |
+  538 |   function aplicarDigitacao(texto: string) {    react-hooks/set-state-in-effect
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\VideoTrimSheet.tsx
+  114:5   error  Error: This value cannot be modified
+
+Modifying a value returned from a hook is not allowed. Consider moving the modification into the hook where the value is constructed.
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\VideoTrimSheet.tsx:114:5
+  112 |     if (!duracaoTotal) return;
+  113 |     pararPreview();
+> 114 |     player.currentTime = inicioTrecho;
+      |     ^^^^^^ `player` cannot be modified
+  115 |     player.play();
+  116 |     previewTimer.current = setInterval(() => {
+  117 |       if (player.currentTime >= fimTrecho) {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-hooks/immutability
+  204:15  error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\VideoTrimSheet.tsx:204:15
+  202 |           style={styles.track}
+  203 |           onLayout={e => setTrackWidth(e.nativeEvent.layout.width)}
+> 204 |           {...panResponder.panHandlers}>
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  205 |           {duracaoTotal > 0 ? (
+  206 |             <>
+  207 |               <View                                                                                                                                                                                                                                                                                                                                                                                react-hooks/refs
+  228:20  error  Error: Cannot modify local variables after render completes
+
+This argument is a function which may reassign or mutate `player` after render, which can cause inconsistent behavior on subsequent renders. Consider using state instead.
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\VideoTrimSheet.tsx:228:20
+  226 |         <TouchableOpacity
+  227 |           style={styles.previewButton}
+> 228 |           onPress={visualizarTrecho}
+      |                    ^^^^^^^^^^^^^^^^ This function may (indirectly) reassign or modify `player` after render
+  229 |           disabled={!duracaoTotal}>
+  230 |           <Text style={styles.previewButtonText}>Visualizar trecho</Text>
+  231 |         </TouchableOpacity>
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registrar\VideoTrimSheet.tsx:114:5
+  112 |     if (!duracaoTotal) return;
+  113 |     pararPreview();
+> 114 |     player.currentTime = inicioTrecho;
+      |     ^^^^^^ This modifies `player`
+  115 |     player.play();
+  116 |     previewTimer.current = setInterval(() => {
+  117 |       if (player.currentTime >= fimTrecho) {  react-hooks/immutability
+
+C:\Users\bizar\Documents\StoryRoot\APP_BASE - Copia\APP-BASE\src\storyroot\screens\registros\RegistrosScreen.tsx
+  796:24  warning  Array type using 'Array<T>' is forbidden. Use 'T[]' instead  @typescript-eslint/array-type
+
+✖ 20 problems (15 errors, 5 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

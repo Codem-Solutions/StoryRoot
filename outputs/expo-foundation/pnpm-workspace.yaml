@@ -1,0 +1,5 @@
+allowBuilds:
+  '@shopify/react-native-skia': true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - react-native@0.86.2

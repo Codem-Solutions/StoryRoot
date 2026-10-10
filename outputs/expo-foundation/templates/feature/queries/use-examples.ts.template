@@ -1,0 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
+import { exampleGateway } from '../services/http-example-gateway';
+
+export const exampleKeys = {
+  all: ['examples'] as const,
+  detail: (id: string) => ['examples', id] as const,
+};
+
+export function useExamples() {
+  return useQuery({
+    queryKey: exampleKeys.all,
+    queryFn: exampleGateway.list,
+  });
+}
+
