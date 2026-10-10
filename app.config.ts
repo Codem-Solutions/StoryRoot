@@ -7,9 +7,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: '1.0.0',
   orientation: 'portrait',
   scheme: 'storyroot',
+  // Logo oficial: ícones gerados a partir de assets/logo_imagem_app.png
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
-  backgroundColor: '#F2EFE8',
+  backgroundColor: '#FAF6EE',
   ios: {
     supportsTablet: true,
     bundleIdentifier: process.env.IOS_BUNDLE_ID ?? 'com.gbizarria.storyroot',
@@ -19,12 +20,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     googleServicesFile: process.env.GOOGLE_SERVICES_FILE || undefined,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#F2EFE8',
+      backgroundColor: '#FAF6EE',
     },
     predictiveBackGestureEnabled: true,
   },
   web: {
     output: 'static',
+    favicon: './assets/favicon.png',
   },
   plugins: [
     'expo-router',
@@ -49,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         image: './assets/splash-icon.png',
         imageWidth: 160,
-        backgroundColor: '#F2EFE8',
+        backgroundColor: '#FAF6EE',
         resizeMode: 'contain',
       },
     ],

@@ -6,6 +6,7 @@ import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { EmptyState } from '../../components/EmptyState';
+import { CarregandoLogo } from '../../components/LogoAnimada';
 import { colors, radius, spacing, typography } from '../../theme';
 import { isExpoGo } from '../../utils/expoEnv';
 
@@ -114,7 +115,9 @@ export function NotificacoesScreen() {
                   : 'Ative lembretes de remédio recorrentes para vê-los aqui.'
               }
             />
-          ) : null
+          ) : (
+            <CarregandoLogo mensagem="Buscando lembretes…" />
+          )
         }
       />
     </View>

@@ -98,7 +98,7 @@ export function LoginScreen() {
       <View style={[styles.content, { paddingTop: insets.top + spacing.xxl }]}>
         <View style={styles.logoRow}>
           <View style={styles.logoIcon}>
-            <StoryRootLogo size={24} variant="markOnPrimary" />
+            <StoryRootLogo size={32} />
           </View>
           <Text style={styles.appName}>Story Root</Text>
         </View>
@@ -230,7 +230,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radius.md,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

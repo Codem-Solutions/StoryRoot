@@ -4,7 +4,7 @@ import { AppState, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { useBiometriaAtiva, useSegurancaStore } from '../store/segurancaStore';
-import { colors, radius, spacing, typography } from '../theme';
+import { colors, spacing, typography } from '../theme';
 import {
   autenticarComBiometria,
   obterCapacidadeBiometria,
@@ -13,7 +13,7 @@ import {
 import { solicitarPermissaoNotificacao } from '../utils/notifications';
 import { showSaveSuccessToast } from '../utils/toast';
 import { PrimaryButton } from './PrimaryButton';
-import { StoryRootLogo } from './StoryRootLogo';
+import { LogoAnimada } from './LogoAnimada';
 
 /** Tempo em segundo plano depois do qual o app volta a pedir a biometria. */
 const TEMPO_PARA_BLOQUEAR_MS = 2 * 60 * 1000;
@@ -151,9 +151,7 @@ function TelaBloqueio() {
         { paddingTop: insets.top + spacing.xxxl, paddingBottom: insets.bottom + spacing.xxl },
       ]}>
       <View style={styles.bloqueioTopo}>
-        <View style={styles.logoIcon}>
-          <StoryRootLogo size={32} variant="markOnPrimary" />
-        </View>
+        <LogoAnimada tamanho={104} />
         <Text style={[typography.h2, styles.centro]}>Story Root bloqueado</Text>
         <Text style={[typography.body, styles.textoSecundario]}>
           Use sua {rotulo} para continuar.
@@ -198,15 +196,6 @@ const styles = StyleSheet.create({
   bloqueioTopo: {
     alignItems: 'center',
     gap: spacing.md,
-  },
-  logoIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.lg,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
   },
   centro: {
     textAlign: 'center',

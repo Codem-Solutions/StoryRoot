@@ -136,7 +136,7 @@ export function HomeScreen() {
             <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
               <View style={styles.headerLeft}>
                 <View style={styles.logoSmall}>
-                  <StoryRootLogo size={18} variant="markOnPrimary" />
+                  <StoryRootLogo size={26} />
                 </View>
                 <Text style={styles.brandName}>Story Root</Text>
               </View>
@@ -302,7 +302,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

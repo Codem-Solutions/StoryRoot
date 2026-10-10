@@ -1,4 +1,4 @@
-package com.yourcompany.foundation
+package com.gbizarria.storyroot
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
