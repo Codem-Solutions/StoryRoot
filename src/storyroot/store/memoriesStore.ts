@@ -7,6 +7,7 @@ interface MemoriesState {
   memorias: Memoria[];
   hasHydrated: boolean;
   adicionarMemoria: (memoria: Memoria) => void;
+  atualizarMemoria: (id: string, patch: Partial<Memoria>) => void;
   removerMemoria: (id: string) => void;
   /** Ao remover uma criança: apaga as memórias das quais ela era dona, e apenas desvincula das compartilhadas. */
   removerOuDesvincularMemoriasDaCrianca: (criancaId: string) => void;
@@ -23,6 +24,8 @@ export const useMemoriesStore = create<MemoriesState>()(
       hasHydrated: false,
       adicionarMemoria: memoria =>
         set({ memorias: [memoria, ...get().memorias] }),
+      atualizarMemoria: (id, patch) =>
+        set({ memorias: get().memorias.map(m => (m.id === id ? { ...m, ...patch } : m)) }),
       removerMemoria: id =>
         set({ memorias: get().memorias.filter(m => m.id !== id) }),
       removerOuDesvincularMemoriasDaCrianca: criancaId =>

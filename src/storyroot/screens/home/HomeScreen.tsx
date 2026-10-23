@@ -3,20 +3,28 @@ import { format, isToday } from 'date-fns';
 import {
   Baby,
   Bell,
+  Camera,
   Check,
   ChevronDown,
   ChevronRight,
   Droplet,
+  Mic,
   Moon,
   Search,
+  SearchX,
+  Video,
+  X,
+  type LucideIcon,
 } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
   Modal,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -30,10 +38,18 @@ import { useMemoriesStore } from '../../store/memoriesStore';
 import { useRecordsStore } from '../../store/recordsStore';
 import { colors, radius, spacing, typography } from '../../theme';
 import { formatarIdade } from '../../utils/age';
+import {
+  anosDasMemorias,
+  filtrarMemorias,
+  indexarMemorias,
+  rotuloMes,
+  type FiltroTipoMidia,
+} from '../../utils/buscaMemorias';
 
-type FiltroPeriodo = 'hoje' | '15dias' | '30dias' | 'personalizado';
+type FiltroPeriodo = 'tudo' | 'hoje' | '15dias' | '30dias' | 'personalizado';
 
 const FILTRO_OPCOES: { valor: FiltroPeriodo; label: string }[] = [
+  { valor: 'tudo', label: 'Todo o período' },
   { valor: 'hoje', label: 'Hoje' },
   { valor: '15dias', label: 'Últimos 15 dias' },
   { valor: '30dias', label: 'Últimos 30 dias' },
@@ -47,7 +63,11 @@ export function HomeScreen() {
   const todosRegistros = useRecordsStore(state => state.registros);
   const todasMemorias = useMemoriesStore(state => state.memorias);
 
-  const [filtro, setFiltro] = useState<FiltroPeriodo>('hoje');
+  const [filtro, setFiltro] = useState<FiltroPeriodo>('tudo');
+  const [busca, setBusca] = useState('');
+  const [tipo, setTipo] = useState<FiltroTipoMidia>('todos');
+  const [ano, setAno] = useState<number | null>(null);
+  const campoBusca = useRef<TextInput>(null);
   const [periodoPersonalizado, setPeriodoPersonalizado] = useState<{
     inicio: Date;
     fim: Date;
@@ -69,20 +89,28 @@ export function HomeScreen() {
 
   // "Nossa História" mostra só memórias (fotos/vídeos/áudios/textos) — registros de
   // rotina e de saúde ficam concentrados nas telas Rotina e Saúde, respectivamente.
-  const entradas = useMemo<TimelineEntry[]>(() => {
-    const doMemorias: TimelineEntry[] = memorias.map(data => ({
-      kind: 'memoria',
-      data,
-    }));
-    return doMemorias.sort(
-      (a, b) => new Date(b.data.data).getTime() - new Date(a.data.data).getTime(),
-    );
+  const indice = useMemo(() => indexarMemorias(memorias), [memorias]);
+  const anos = useMemo(() => anosDasMemorias(memorias), [memorias]);
+  const contagemPorTipo = useMemo(() => {
+    const contagem: Partial<Record<FiltroTipoMidia, number>> = { todos: memorias.length };
+    for (const m of memorias) contagem[m.tipoMidia] = (contagem[m.tipoMidia] ?? 0) + 1;
+    return contagem;
   }, [memorias]);
+
+  const filtrosAtivos = !!busca.trim() || tipo !== 'todos' || ano !== null || filtro !== 'tudo';
+
+  function limparFiltros() {
+    setBusca('');
+    setTipo('todos');
+    setAno(null);
+    setFiltro('tudo');
+  }
 
   const entradasFiltradas = useMemo(() => {
     const agora = new Date();
     function dentroDoPeriodo(dataIso: string) {
       const data = new Date(dataIso);
+      if (filtro === 'tudo') return true;
       if (filtro === 'hoje') return isToday(data);
       if (filtro === '15dias' || filtro === '30dias') {
         const dias = filtro === '15dias' ? 15 : 30;
@@ -97,14 +125,37 @@ export function HomeScreen() {
       }
       return true;
     }
-    return entradas.filter(e => dentroDoPeriodo(e.data.data));
-  }, [entradas, filtro, periodoPersonalizado]);
+    return filtrarMemorias(indice, { texto: busca, tipo, ano })
+      .filter(m => dentroDoPeriodo(m.data))
+      .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  }, [indice, busca, tipo, ano, filtro, periodoPersonalizado]);
+
+  // Lista com um cabeçalho por mês ("Outubro de 2026") antes das memórias daquele mês.
+  const itensLista = useMemo<ItemLista[]>(() => {
+    const itens: ItemLista[] = [];
+    let mesAtual = '';
+    entradasFiltradas.forEach((memoria, index) => {
+      const mes = rotuloMes(memoria.data);
+      if (mes !== mesAtual) {
+        mesAtual = mes;
+        itens.push({ tipo: 'mes', chave: `mes-${mes}`, titulo: mes });
+      }
+      const proxima = entradasFiltradas[index + 1];
+      itens.push({
+        tipo: 'memoria',
+        chave: `memoria-${memoria.id}`,
+        entrada: { kind: 'memoria', data: memoria },
+        ultimaDoMes: !proxima || rotuloMes(proxima.data) !== mes,
+      });
+    });
+    return itens;
+  }, [entradasFiltradas]);
 
   const filtroLabel = useMemo(() => {
     if (filtro === 'personalizado' && periodoPersonalizado) {
       return `${format(periodoPersonalizado.inicio, 'dd/MM')} - ${format(periodoPersonalizado.fim, 'dd/MM')}`;
     }
-    return FILTRO_OPCOES.find(o => o.valor === filtro)?.label ?? 'Hoje';
+    return FILTRO_OPCOES.find(o => o.valor === filtro)?.label ?? 'Todo o período';
   }, [filtro, periodoPersonalizado]);
 
   function selecionarFiltro(valor: FiltroPeriodo) {
@@ -128,9 +179,11 @@ export function HomeScreen() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={entradasFiltradas}
-        keyExtractor={item => `${item.kind}-${item.data.id}`}
+        data={itensLista}
+        keyExtractor={item => item.chave}
         contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <>
             <View style={[styles.header, { paddingTop: insets.top + spacing.md }]}>
@@ -141,7 +194,11 @@ export function HomeScreen() {
                 <Text style={styles.brandName}>Story Root</Text>
               </View>
               <View style={styles.headerRight}>
-                <TouchableOpacity style={styles.iconCircle}>
+                <TouchableOpacity
+                  style={styles.iconCircle}
+                  onPress={() => campoBusca.current?.focus()}
+                  accessibilityRole="button"
+                  accessibilityLabel="Buscar na linha do tempo">
                   <Search size={20} color={colors.text} />
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -214,19 +271,117 @@ export function HomeScreen() {
                 <ChevronDown size={14} color={colors.primary} />
               </TouchableOpacity>
             </View>
+
+            {memorias.length > 0 && (
+              <View style={styles.buscaSecao}>
+                <View style={styles.buscaCampo}>
+                  <Search size={18} color={colors.placeholder} />
+                  <TextInput
+                    ref={campoBusca}
+                    style={styles.buscaInput}
+                    placeholder="Buscar por título, descrição, data, mês…"
+                    placeholderTextColor={colors.placeholder}
+                    value={busca}
+                    onChangeText={setBusca}
+                    returnKeyType="search"
+                    autoCorrect={false}
+                    accessibilityLabel="Buscar na linha do tempo"
+                  />
+                  {!!busca && (
+                    <TouchableOpacity
+                      onPress={() => setBusca('')}
+                      hitSlop={8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Limpar busca">
+                      <X size={16} color={colors.textMuted} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.chipsLinha}
+                  keyboardShouldPersistTaps="handled">
+                  {FILTROS_TIPO.map(opcao => (
+                    <ChipFiltro
+                      key={opcao.valor}
+                      label={opcao.label}
+                      quantidade={contagemPorTipo[opcao.valor] ?? 0}
+                      icone={opcao.icone}
+                      ativo={tipo === opcao.valor}
+                      onPress={() => setTipo(opcao.valor)}
+                    />
+                  ))}
+                </ScrollView>
+
+                {anos.length > 1 && (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.chipsLinha}
+                    keyboardShouldPersistTaps="handled">
+                    <ChipFiltro label="Todos os anos" ativo={ano === null} onPress={() => setAno(null)} />
+                    {anos.map(valor => (
+                      <ChipFiltro
+                        key={valor}
+                        label={String(valor)}
+                        ativo={ano === valor}
+                        onPress={() => setAno(ano === valor ? null : valor)}
+                      />
+                    ))}
+                  </ScrollView>
+                )}
+
+                {filtrosAtivos && (
+                  <View style={styles.resultadoLinha}>
+                    <Text style={styles.resultadoTexto}>
+                      {entradasFiltradas.length === 1
+                        ? '1 memória encontrada'
+                        : `${entradasFiltradas.length} memórias encontradas`}
+                    </Text>
+                    <TouchableOpacity onPress={limparFiltros} accessibilityRole="button">
+                      <Text style={styles.limparTexto}>Limpar filtros</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
           </>
         }
-        renderItem={({ item, index }) => (
-          <View style={styles.timelineItemWrapper}>
-            <TimelineItem entry={item} isLast={index === entradasFiltradas.length - 1} />
-          </View>
-        )}
+        renderItem={({ item }) =>
+          item.tipo === 'mes' ? (
+            <Text style={styles.mesTitulo} accessibilityRole="header">
+              {item.titulo}
+            </Text>
+          ) : (
+            <View style={styles.timelineItemWrapper}>
+              <TimelineItem entry={item.entrada} isLast={item.ultimaDoMes} />
+            </View>
+          )
+        }
         ListEmptyComponent={
-          <EmptyState
-            icon={StoryRootLogoIcon}
-            title="A história ainda vai começar"
-            description="Toque no + para registrar cuidados diários e memórias."
-          />
+          memorias.length > 0 ? (
+            <View style={styles.vazioBusca}>
+              <EmptyState
+                icon={SearchX}
+                title="Nada encontrado"
+                description="Tente outra palavra, outro tipo ou outro período."
+              />
+              <TouchableOpacity
+                style={styles.vazioBotao}
+                onPress={limparFiltros}
+                accessibilityRole="button">
+                <Text style={styles.limparTexto}>Limpar filtros</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <EmptyState
+              icon={StoryRootLogoIcon}
+              title="A história ainda vai começar"
+              description="Toque no + para registrar cuidados diários e memórias."
+            />
+          )
         }
       />
 
@@ -275,10 +430,123 @@ export function HomeScreen() {
   );
 }
 
+type ItemLista =
+  | { tipo: 'mes'; chave: string; titulo: string }
+  | { tipo: 'memoria'; chave: string; entrada: TimelineEntry; ultimaDoMes: boolean };
+
+const FILTROS_TIPO: { valor: FiltroTipoMidia; label: string; icone?: LucideIcon }[] = [
+  { valor: 'todos', label: 'Tudo' },
+  { valor: 'foto', label: 'Fotos', icone: Camera },
+  { valor: 'video', label: 'Vídeos', icone: Video },
+  { valor: 'audio', label: 'Áudios', icone: Mic },
+];
+
+function ChipFiltro({
+  label,
+  ativo,
+  onPress,
+  quantidade,
+  icone: Icone,
+}: {
+  label: string;
+  ativo: boolean;
+  onPress: () => void;
+  quantidade?: number;
+  icone?: LucideIcon;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.chip, ativo && styles.chipAtivo]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: ativo }}>
+      {!!Icone && <Icone size={14} color={ativo ? '#fff' : colors.primary} />}
+      <Text style={[styles.chipTexto, ativo && styles.chipTextoAtivo]}>
+        {label}
+        {quantidade !== undefined ? ` · ${quantidade}` : ''}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  buscaSecao: {
+    paddingHorizontal: spacing.xxl,
+    paddingBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  buscaCampo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  buscaInput: {
+    ...typography.body,
+    flex: 1,
+    paddingVertical: spacing.md,
+  },
+  chipsLinha: {
+    gap: spacing.xs,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  chipAtivo: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  chipTexto: {
+    ...typography.label,
+    fontSize: 13,
+    color: colors.text,
+  },
+  chipTextoAtivo: {
+    color: '#fff',
+  },
+  resultadoLinha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  resultadoTexto: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
+  limparTexto: {
+    ...typography.label,
+    fontSize: 13,
+    color: colors.primary,
+  },
+  mesTitulo: {
+    ...typography.label,
+    color: colors.textMuted,
+    paddingHorizontal: spacing.xxl,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  vazioBusca: {
+    alignItems: 'center',
+  },
+  vazioBotao: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   listContent: {
     paddingBottom: 140,

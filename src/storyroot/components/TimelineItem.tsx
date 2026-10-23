@@ -1,11 +1,24 @@
-import { Sparkles } from 'lucide-react-native';
-import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Camera, Mic, MoreVertical, Sparkles, Video, type LucideIcon } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RECORD_TYPES } from '../constants/recordTypes';
+import { useMemoriesStore } from '../store/memoriesStore';
 import { colors, radius, spacing, typography } from '../theme';
-import type { Memoria, Registro } from '../types';
+import type { Memoria, Registro, TipoMidiaMemoria } from '../types';
+import { ROTULOS_TIPO_MIDIA } from '../utils/buscaMemorias';
 import { formatarDataBR, formatarHora, formatarValorExibicao } from '../utils/format';
+import { apagarMidiaPermanente } from '../utils/midia';
+import { showSaveSuccessToast } from '../utils/toast';
 import { AudioPlayer } from './AudioPlayer';
+import { EditarMemoriaSheet } from './EditarMemoriaSheet';
+import { VideoMemoria } from './VideoMemoria';
+
+const META_MIDIA: Record<TipoMidiaMemoria, { icon: LucideIcon; cor: string }> = {
+  foto: { icon: Camera, cor: colors.accent },
+  video: { icon: Video, cor: colors.violet },
+  audio: { icon: Mic, cor: colors.primary },
+  texto: { icon: Sparkles, cor: colors.amber },
+};
 
 export type TimelineEntry =
   | { kind: 'registro'; data: Registro }
@@ -50,27 +63,84 @@ export function TimelineItem({
     );
   }
 
-  const memoria = entry.data;
+  return <MemoriaItem memoria={entry.data} isLast={isLast} />;
+}
+
+function MemoriaItem({ memoria, isLast }: { memoria: Memoria; isLast: boolean }) {
+  const removerMemoria = useMemoriesStore(s => s.removerMemoria);
+  const [editando, setEditando] = useState(false);
+  const meta = META_MIDIA[memoria.tipoMidia];
+  const IconeMidia = meta.icon;
+  const rotulo = ROTULOS_TIPO_MIDIA[memoria.tipoMidia].toLowerCase();
+  const compartilhada = !!memoria.criancaIdsCompartilhado?.length;
+
+  function confirmarExclusao() {
+    Alert.alert(
+      `Apagar ${rotulo}?`,
+      `"${memoria.titulo}" será apagado da linha do tempo${
+        compartilhada ? ' de todas as crianças com quem foi compartilhado' : ''
+      }. Essa ação não pode ser desfeita.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Apagar',
+          style: 'destructive',
+          onPress: () => {
+            removerMemoria(memoria.id);
+            apagarMidiaPermanente(memoria.midiaUri);
+            showSaveSuccessToast('Memória apagada');
+          },
+        },
+      ],
+    );
+  }
+
+  function abrirOpcoes() {
+    Alert.alert(memoria.titulo, undefined, [
+      { text: 'Editar', onPress: () => setEditando(true) },
+      { text: 'Apagar', style: 'destructive', onPress: confirmarExclusao },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
+  }
+
   return (
     <View style={styles.row}>
       <View style={styles.leftBar}>
-        <View style={[styles.iconNode, { backgroundColor: colors.accent }]}>
-          <Sparkles size={14} color="#fff" />
+        <View style={[styles.iconNode, { backgroundColor: meta.cor }]}>
+          <IconeMidia size={14} color="#fff" />
         </View>
         {!isLast && <View style={styles.verticalLine} />}
       </View>
       <View style={styles.cardWrapper}>
         <View style={styles.memoryCard}>
-          {memoria.midiaUri && memoria.tipoMidia !== 'audio' ? (
+          {memoria.tipoMidia === 'foto' && !!memoria.midiaUri && (
             <Image source={{ uri: memoria.midiaUri }} style={styles.memoryPhoto} />
-          ) : null}
+          )}
+          {memoria.tipoMidia === 'video' && !!memoria.midiaUri && (
+            <VideoMemoria
+              uri={memoria.midiaUri}
+              titulo={memoria.titulo}
+              trimStartMs={memoria.trimStartMs}
+              trimEndMs={memoria.trimEndMs}
+            />
+          )}
           <View style={styles.memoryBody}>
             <View style={styles.cardHeader}>
               <View style={styles.tag}>
-                <Sparkles size={12} color={colors.primary} />
-                <Text style={styles.tagText}>Momento especial</Text>
+                <IconeMidia size={12} color={colors.primary} />
+                <Text style={styles.tagText}>{ROTULOS_TIPO_MIDIA[memoria.tipoMidia]}</Text>
               </View>
-              <Text style={styles.ageText}>{formatarDataBR(memoria.data)}</Text>
+              <View style={styles.cabecalhoDireita}>
+                <Text style={styles.ageText}>{formatarDataBR(memoria.data)}</Text>
+                <TouchableOpacity
+                  style={styles.botaoOpcoes}
+                  onPress={abrirOpcoes}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Opções de ${memoria.titulo}: editar ou apagar`}>
+                  <MoreVertical size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
             </View>
             {!!memoria.titulo && <Text style={typography.h4}>{memoria.titulo}</Text>}
             {!!memoria.descricao && (
@@ -82,11 +152,24 @@ export function TimelineItem({
           </View>
         </View>
       </View>
+      {editando && <EditarMemoriaSheet memoria={memoria} onClose={() => setEditando(false)} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  cabecalhoDireita: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  botaoOpcoes: {
+    width: 28,
+    height: 28,
+    marginRight: -spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   row: {
     flexDirection: 'row',
     gap: spacing.lg,

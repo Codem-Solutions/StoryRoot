@@ -113,7 +113,7 @@ export function AudioRecorderSheet() {
   }
 
   async function salvar() {
-    if (!criancaAtiva || salvando) return;
+    if (!criancaAtiva || salvando || !titulo.trim()) return;
     setSalvando(true);
     try {
       const final = recorder.isRecording ? await pararGravacao(recorder) : gravacao;
@@ -126,7 +126,7 @@ export function AudioRecorderSheet() {
         id: String(Date.now()),
         criancaId: criancaAtiva.id,
         criancaIdsCompartilhado: irmaosSelecionados.length ? irmaosSelecionados : undefined,
-        titulo: titulo.trim() || 'Nova gravação',
+        titulo: titulo.trim(),
         data: new Date().toISOString(),
         tipoMidia: 'audio',
         midiaUri,
@@ -204,14 +204,18 @@ export function AudioRecorderSheet() {
             )}
 
             <View style={styles.field}>
-              <Text style={typography.label}>Título (opcional)</Text>
+              <Text style={typography.label}>Título *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ex: Primeira palavra"
                 placeholderTextColor={colors.placeholder}
                 value={titulo}
                 onChangeText={setTitulo}
+                accessibilityLabel="Título, obrigatório"
               />
+              <Text style={styles.dica}>
+                Obrigatório. É pelo título que você vai encontrar este áudio na busca.
+              </Text>
             </View>
 
             <SiblingShareToggle
@@ -222,7 +226,7 @@ export function AudioRecorderSheet() {
             <PrimaryButton
               label="Salvar gravação"
               onPress={salvar}
-              disabled={!gravacao && !gravando}
+              disabled={(!gravacao && !gravando) || !titulo.trim()}
               loading={salvando}
               style={styles.saveButton}
             />
@@ -295,6 +299,10 @@ const styles = StyleSheet.create({
   field: {
     gap: spacing.sm,
     marginBottom: spacing.lg,
+  },
+  dica: {
+    ...typography.caption,
+    color: colors.textMuted,
   },
   input: {
     ...typography.body,

@@ -27,13 +27,13 @@ export function PhotoPreviewSheet() {
   }
 
   function salvar() {
-    if (!criancaAtiva) return;
+    if (!criancaAtiva || !titulo.trim()) return;
     try {
       adicionarMemoria({
         id: String(Date.now()),
         criancaId: criancaAtiva.id,
         criancaIdsCompartilhado: irmaosSelecionados.length ? irmaosSelecionados : undefined,
-        titulo: titulo.trim() || 'Novo momento',
+        titulo: titulo.trim(),
         descricao: descricao.trim() || undefined,
         data: new Date().toISOString(),
         tipoMidia: 'foto',
@@ -63,14 +63,18 @@ export function PhotoPreviewSheet() {
         <Image source={{ uri: imageUri }} style={styles.preview} />
 
         <View style={styles.field}>
-          <Text style={typography.label}>Título (opcional)</Text>
+          <Text style={typography.label}>Título *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.inputTitulo]}
             placeholder="Ex: Primeiro sorriso do dia"
             placeholderTextColor={colors.placeholder}
             value={titulo}
             onChangeText={setTitulo}
+            accessibilityLabel="Título, obrigatório"
           />
+          <Text style={styles.dica}>
+            Obrigatório. É pelo título que você vai encontrar esta foto na busca.
+          </Text>
         </View>
 
         <View style={styles.field}>
@@ -90,7 +94,12 @@ export function PhotoPreviewSheet() {
           onChange={setIrmaosSelecionados}
         />
 
-        <PrimaryButton label="Salvar foto" onPress={salvar} style={styles.saveButton} />
+        <PrimaryButton
+          label="Salvar foto"
+          onPress={salvar}
+          disabled={!titulo.trim()}
+          style={styles.saveButton}
+        />
       </KeyboardAwareScrollView>
     </BottomSheet>
   );
@@ -132,6 +141,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  inputTitulo: {
+    minHeight: 0,
+  },
+  dica: {
+    ...typography.caption,
+    color: colors.textMuted,
   },
   saveButton: {
     marginTop: spacing.xs,

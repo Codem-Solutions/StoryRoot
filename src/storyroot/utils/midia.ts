@@ -19,6 +19,20 @@ export async function salvarMidiaPermanente(uri: string, pasta: string): Promise
   }
 }
 
+/**
+ * Apaga um arquivo que o app salvou na pasta de documentos. Arquivos fora dela
+ * (galeria, cache de outro app) nunca são tocados.
+ */
+export function apagarMidiaPermanente(uri?: string): void {
+  if (!uri || !uri.startsWith(Paths.document.uri)) return;
+  try {
+    const arquivo = new File(uri);
+    if (arquivo.exists) arquivo.delete();
+  } catch {
+    // Se não der para apagar, o arquivo só fica órfão — não deve travar a exclusão.
+  }
+}
+
 /** Como `salvarMidiaPermanente`, para vários arquivos; os que já estão salvos ficam como estão. */
 export function salvarMidiasPermanentes(uris: string[], pasta: string): Promise<string[]> {
   const raiz = Paths.document.uri;

@@ -130,7 +130,7 @@ export function VideoTrimSheet() {
   }
 
   function salvar() {
-    if (!criancaAtiva) return;
+    if (!criancaAtiva || !titulo.trim()) return;
     try {
       pararPreview();
       player.pause();
@@ -138,7 +138,7 @@ export function VideoTrimSheet() {
         id: String(Date.now()),
         criancaId: criancaAtiva.id,
         criancaIdsCompartilhado: irmaosSelecionados.length ? irmaosSelecionados : undefined,
-        titulo: titulo.trim() || 'Novo momento',
+        titulo: titulo.trim(),
         descricao: descricao.trim() || undefined,
         data: new Date().toISOString(),
         tipoMidia: 'video',
@@ -238,14 +238,18 @@ export function VideoTrimSheet() {
         </TouchableOpacity>
 
         <View style={styles.field}>
-          <Text style={typography.label}>Título (opcional)</Text>
+          <Text style={typography.label}>Título *</Text>
           <TextInput
             style={styles.input}
             placeholder="Ex: Primeiros passos"
             placeholderTextColor={colors.placeholder}
             value={titulo}
             onChangeText={setTitulo}
+            accessibilityLabel="Título, obrigatório"
           />
+          <Text style={styles.dica}>
+            Obrigatório. É pelo título que você vai encontrar este vídeo na busca.
+          </Text>
         </View>
 
         <View style={styles.field}>
@@ -265,13 +269,22 @@ export function VideoTrimSheet() {
           onChange={setIrmaosSelecionados}
         />
 
-        <PrimaryButton label="Salvar vídeo" onPress={salvar} style={styles.saveButton} />
+        <PrimaryButton
+          label="Salvar vídeo"
+          onPress={salvar}
+          disabled={!titulo.trim()}
+          style={styles.saveButton}
+        />
       </KeyboardAwareScrollView>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
+  dica: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
