@@ -1,8 +1,0 @@
-import { api } from '@/core/api/api-client';
-import type { ExampleGateway } from '../domain/example';
-
-export const exampleGateway: ExampleGateway = {
-  list: () => api.get('/examples'),
-  getById: (id) => api.get(`/examples/${encodeURIComponent(id)}`),
-};
-
